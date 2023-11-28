@@ -8,7 +8,10 @@ FF_df <- read.csv("fast_food.csv")
 
 df1 <- merge(nat_ob_df, GDP_df, by.x = "NAME", by.y = "GeoName")
 df <- merge(df1, FF_df, by.x = "NAME", by.y = "State")
-df <- subset(df, select = c(NAME, Obesity, Region, LineCode, Description, X2023.Q1, Population.2022, McDonald.s, Starbucks, Chick.fill.A, Taco.Bell, Wendy.s, Dunkin.Donuts, Burger.King, Subway, Domino.s, Chipotle, Sonic..Drive.In, Pizza.Hut, Panda.Express, KFC, Dairy.Queen, Arby.s, Buffalo.Wild.Wings, Whataburger, Five.Guys, In.N.Out.Burger))
+df <- subset(df, select = c(NAME, Obesity, Region, LineCode, Description, X2023.Q1, Population.2022, McDonald.s, 
+                            Starbucks, Chick.fill.A, Taco.Bell, Wendy.s, Dunkin.Donuts, Burger.King, Subway, 
+                            Domino.s, Chipotle, Sonic..Drive.In, Pizza.Hut, Panda.Express, KFC, Dairy.Queen, Arby.s, 
+                            Buffalo.Wild.Wings, Whataburger, Five.Guys, In.N.Out.Burger))
 df <- subset(df, LineCode != "1")
 df <- subset(df, LineCode != "2")
 
@@ -20,6 +23,7 @@ df$GDP_Category <- case_when(
   df$X2023.Q1 > 0 ~ "Low GDP"
 )
 
+#Adding Region
 state_to_region <- function(state_name) {
   regions <- list(
     "West" = c("Washington", "Oregon", "Idaho", "Alaska", "California", "Colorado",
@@ -45,5 +49,9 @@ df<- df %>%
   mutate(US.Territory.Region = sapply(NAME, state_to_region)) %>%
   select(NAME, US.Territory.Region, everything())
 
+#Summarization
 summary_df <- aggregate(X2023.Q1 ~ GDP_Category, data = df, FUN = mean)
 colnames(summary_df) <- c("GDP_Category", "Average_GDP")
+
+#Save df as CSV
+write.csv(df, "Group_Proj_df.csv")
