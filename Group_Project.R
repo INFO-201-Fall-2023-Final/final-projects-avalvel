@@ -53,5 +53,11 @@ df<- df %>%
 summary_df <- aggregate(X2023.Q1 ~ GDP_Category, data = df, FUN = mean)
 colnames(summary_df) <- c("GDP_Category", "Average_GDP")
 
+#Sum of all fastfood resturants per state
+df[, 9:28] <- lapply(df[, 9:28], as.numeric)
+df$Sum <- rowSums(df[, 9:28], na.rm = TRUE)
+
+
 #Save df as CSV
 write.csv(df, "Group_Proj_df.csv")
+
