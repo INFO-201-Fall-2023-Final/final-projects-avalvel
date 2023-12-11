@@ -27,7 +27,7 @@ ui <- fluidPage(
   br(),
   
   tabsetPanel(
-    tabPanel("Title Page",
+    tabPanel("Home",
              h3("Introduction"),
              p("Welcome to our platform, where we embark on a journey to uncover the intricate relationship 
                between fast food consumption and socioeconomic status. Our project seeks to illuminate a 
@@ -42,21 +42,25 @@ ui <- fluidPage(
                factors driving fast food consumption, we aim to contribute to the discourse on creating a more 
                equitable and accessible food environment for all."),
              br(),
-             p("More info"),
-             br(),
-             
-             h6("Fast Food Pic:"),
-             img(src = "fastfoodpic.png", width = 300, height = 300),
+             p("In our exploration, we delve into the multifaceted relationship between fast food, economic status, 
+               and regional patterns across the United States. The visualizations presented include a map showcasing 
+               regional obesity rates and fast-food density, revealing a correlation between the concentration of 
+               fast-food establishments and higher obesity rates. Another visualization employs a chart, mapping the 
+               density of fast-food chains against obesity rates in different states, considering demographic and 
+               economic factors through bubble size and color. Additionally, a Shiny app allows users to explore how 
+               the presence of specific fast-food chains correlates with varying levels of economic development across 
+               regions. This lens into the interplay between economic prosperity and fast-food market dynamics sheds 
+               light on potential socioeconomic influences, contributing to a broader discourse on creating a more 
+               equitable and accessible food environment nationwide."),
              hr(),
-             
              h5("For more information vist..."),
              a("National Library of Medicine", href = "https://pubmed.ncbi.nlm.nih.gov/28472714/"),
              br(),
              a("BMC Public Health", href = "https://bmcpublichealth.biomedcentral.com/articles/10.1186/s12889-022-13826-1"),
              br(),
              a("NY Times", href = "https://www.nytimes.com/2023/02/28/opinion/processed-food-social-class-america.html"),
-             
-             
+             br(),
+             a("Science Direct", href = "https://www.sciencedirect.com/science/article/abs/pii/S1570677X16300363")
     ),
     
     tabPanel("US Regional Analysis",
@@ -87,13 +91,25 @@ ui <- fluidPage(
              h3("Fast Food Influence on Obesity"),
              sidebarLayout(
                sidebarPanel(
-                 # Add filter inputs for users
-                 sliderInput("obesityFilter", "Filter by Obesity Rate:", min = 0, max = 50, value = c(0, 50)),
-                 selectInput("gdpFilter", "Filter by GDP Category:", choices = unique(df$GDP_Category)),
+                 # Add slider input for X-axis range selection
+                 sliderInput("xRange", "Fast Food Chain Density:",
+                             min = min(df$X2023.Q1), max = max(df$X2023.Q1),
+                             value = c(min(df$X2023.Q1), max(df$X2023.Q1)), step = 0.1)
                ),
                
                mainPanel(
-                 plotlyOutput("bubbleChart")
+                 plotlyOutput("bubbleChart"),
+                 div(style = "margin-top: 30px;"),  # Add space between graph and text
+                 HTML('<p>The link between the density of fast food chains and the rates of obesity in the 
+                      different states included in the dataset is shown in this visualization. The density 
+                      of fast food chains is represented by the X-axis, which shows the total count as well 
+                      as the individual counts of various fast food franchises. The chart shows the reported 
+                      obesity rates for each state on the Y-axis. The bubbles provide a visual depiction of 
+                      their significance or scale within the dataset; their size and color correlate to the 
+                      GDP or population size of the state. The chart\'s bubbles, each representing a state, 
+                      enable quick comprehension of the relationship between the presence of fast food and 
+                      obesity rates while taking into account the demographic or economic context denoted by 
+                      the bubbles\' size and color.</p>')
                )
              )
     ),
@@ -101,7 +117,6 @@ ui <- fluidPage(
     tabPanel("Economic Impact",
              fluidPage(
                titlePanel("Economic Impact: GDP and Fast Food Chains"),
-               tags$img(src = "mcdonalds-money.jpeg", width = 200, height = 200),
                sidebarLayout(
                  sidebarPanel(
                    selectInput("fastfood", "Select a Fast Food Chain", choices = names(df)[10:27])
@@ -176,17 +191,16 @@ server <- function(input, output) {
     datatable(summary_data, options = list(pageLength = 5))
   })
   
-  #Bubblechart
+  filtered_df <- reactive({
+    df %>%
+      filter(X2023.Q1 >= input$xRange[1] & X2023.Q1 <= input$xRange[2])
+  })
+  
+  # Create Bubble Chart
   output$bubbleChart <- renderPlotly({
-    df_filtered <- df[df$Obesity >= input$obesityFilter[1] & df$Obesity <= input$obesityFilter[2] &
-                        df$GDP_Category == input$gdpFilter, ]
-    
-    plot_ly(df_filtered, x = ~McDonald.s, y = ~Obesity,
-            text = ~paste("State: ", NAME, "<br> GDP Category: ", GDP_Category, "<br> Population: ", Population.2022),
-            marker = list(size = ~Population.2022, color = ~GDP_Category, colorscale = "Viridis", 
-                          colorbar = list(title = "GDP Category")),
-            mode = "markers"
-    ) %>%
+    plot_ly(filtered_df(), x = ~X2023.Q1, y = ~Obesity, color = ~GDP_Category,
+            text = ~paste("State: ", NAME, "<br>GDP Category: ", GDP_Category, "<br>Population: ", Population.2022),
+            size = ~Population.2022, sizes = c(5, 100)) %>%
       layout(xaxis = list(title = "Fast Food Chain Density"),
              yaxis = list(title = "Obesity Rate"),
              title = "Fast Food Chain Density vs Obesity Rate")
