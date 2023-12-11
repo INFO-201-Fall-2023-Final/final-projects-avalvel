@@ -34,7 +34,7 @@ state_to_region <- function(state_name) {
     "Northeast" = c("New York", "Pennsylvania", "Massachusetts", "Connecticut", "Maine", 
                     "New Hampshire", "Rhode Island", "Vermont", "New Jersey"),
     "Southeast" = c("Florida", "Georgia", "Alabama", "Mississippi", "Arkansas", "North Carolina", 
-                    "South Carolina", "Virginia", "West Virgina", "Kentucky", "Tennessee",
+                    "South Carolina", "Virginia", "West Virginia", "Kentucky", "Tennessee",
                     "Delaware","Maryland", "Louisiana")
   )
   

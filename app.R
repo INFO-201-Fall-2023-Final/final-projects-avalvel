@@ -83,7 +83,7 @@ ui <- fluidPage(
              DTOutput("summaryTable")
     ),
     
-    tabPanel("Bubble Chart",
+    tabPanel("Fast Food Influence on Obesity",
              h3("Fast Food Influence on Obesity"),
              sidebarLayout(
                sidebarPanel(
@@ -104,7 +104,7 @@ ui <- fluidPage(
                tags$img(src = "mcdonalds-money.jpeg", width = 200, height = 200),
                sidebarLayout(
                  sidebarPanel(
-                   selectInput("fastfood", "Select a Fast Food Chain", choices = names(data)[10:27])
+                   selectInput("fastfood", "Select a Fast Food Chain", choices = names(df)[10:27])
                  ),
                  mainPanel(
                    plotOutput("plot")
@@ -193,7 +193,7 @@ server <- function(input, output) {
   })
   
   output$plot <- renderPlot({
-    ggplot(data, aes_string(x = "GDP_Category", y = input$fastfood)) +
+    ggplot(df, aes_string(x = "GDP_Category", y = input$fastfood)) +
       geom_boxplot(fill = "lightblue") +
       labs(x = "GDP Category", y = input$fastfood)
   })
